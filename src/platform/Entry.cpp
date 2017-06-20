@@ -69,6 +69,8 @@ int main(int argc, char **argv)
         argsJoined.append(argv[i]);
         argsJoined.append(" ");
     }
+    Logger::InitDefaultLogger("log.log", true);
+    LOG_INFO "log initialized" LOG_END;
     // Yes, I use const cast in situations like this. As the string is used as constant and it is easy to change to non-console entry point.
     //return WinMain(NULL, NULL, const_cast<LPSTR>(argsJoined.c_str()), SW_SHOW);
     Renderer renderer(nullptr);
@@ -123,6 +125,8 @@ int main(int argc, char **argv)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow)
 {
+    
+
     MyRegisterClass(hInstance);
 
     MSG msg;
@@ -131,8 +135,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
         CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
 	// This actually could fail because of the security policies. But I think, honouring them here will make the code worse with no real benefits.
-    Logger::InitDefaultLogger("log.log", true); 
-    LOG_INFO "log initialized" LOG_END;
+    
 
     if (!windowHandle)
     {

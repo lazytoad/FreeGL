@@ -7,6 +7,8 @@
 #include <assert.h>
 #include <string>
 
+#include "Utils.h"
+
 
 
 #define DEFAULT_COLOR_BUFFER_SIZE 32
@@ -16,7 +18,7 @@
 static HGLRC __hrc = 0; // \todo move shit to Entry
 static HINSTANCE __hinstance = 0;
 
-static bool vsync = true;
+static bool vsync = false;
 
 static bool multiSampling = false;
 
@@ -188,6 +190,9 @@ bool Renderer::Initialize()
 
     if (initializeGL(&params))
     {
+        renderCore.initialize();
+
+        isReady = true;
         ShowWindow(hwnd, SW_SHOW);
         return true;
     }
@@ -339,11 +344,21 @@ bool Renderer::initializeGL(WindowCreationParams* params)
             return false;
         }
 
+		int versionMajor = -1;
+		glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+		int versionMinor = -1;
+		glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+
+		if (versionMajor < 3)
+		{
+			LOG_ERROR "too low opengl version "<< versionMajor<<"."<< versionMinor LOG_END;
+		}
+
         // Create our new GL context
         int attribs[] =
         {
-            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-            WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+            WGL_CONTEXT_MAJOR_VERSION_ARB, versionMajor,
+            WGL_CONTEXT_MINOR_VERSION_ARB, versionMinor,
             0
         };
 
@@ -386,7 +401,7 @@ bool Renderer::initializeGL(WindowCreationParams* params)
 
     // Some old graphics cards support EXT_framebuffer_object instead of ARB_framebuffer_object.
     // Patch ARB_framebuffer_object functions to EXT_framebuffer_object ones since semantic is same.
-    if (!GLEW_ARB_framebuffer_object && GLEW_EXT_framebuffer_object)
+    /*if (!GLEW_ARB_framebuffer_object && GLEW_EXT_framebuffer_object)
     {
         glBindFramebuffer = glBindFramebufferEXT;
         glBindRenderbuffer = glBindRenderbufferEXT;
@@ -408,15 +423,146 @@ bool Renderer::initializeGL(WindowCreationParams* params)
         glIsRenderbuffer = glIsRenderbufferEXT;
         glRenderbufferStorage = glRenderbufferStorageEXT;
         glRenderbufferStorageMultisample = glRenderbufferStorageMultisampleEXT;
+    }*/
+
+    glGenVertexArrays(1, &vertexArray);
+    glBindVertexArray(vertexArray);
+
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+    float verts[] = { 0, 0, 0, 0,
+        0, 1, 0, 1,
+        1, 1, 1, 1,
+        1, 0, 1, 0 };
+
+    glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), verts, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 16, (char*)8);
+
+    const char vshCode[] =
+"#version 150       \n\
+in  vec2 pos;       \n\
+in  vec2 tex;       \n\
+varying vec2 vTex;  \n\
+void main(void) {   \n\
+    gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);\n\
+    vTex = tex;     \n\
+}";
+    const char fshCode[] =
+"#version 150       \n\
+uniform sampler2D texture;       \n\
+varying vec2 vTex;  \n\
+void main(void) {   \n\
+    gl_FragColor = texture2D(texture, vTex);     \n\
+}";
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+    const GLchar* p[] = { vshCode };
+    int zero = strlen(vshCode);
+    glShaderSource(vertexShader, 1, (const GLchar**)&p, nullptr);
+    /* Compile the vertex shader */
+    glCompileShader(vertexShader);
+    int IsCompiled_VS, IsCompiled_FS;
+    int IsLinked;
+    int maxLength;
+
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &IsCompiled_VS);
+    if (IsCompiled_VS == FALSE)
+    {
+        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        /* The maxLength includes the NULL character */
+        char * vertexInfoLog = (char *)malloc(maxLength);
+
+        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, vertexInfoLog);
+
+        LOG_ERROR vertexInfoLog LOG_END;
+        free(vertexInfoLog);
+        return false;
     }
 
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    p[0] = fshCode;
+    /* Send the fragment shader source code to GL */
+    /* Note that the source code is NULL character terminated. */
+    /* GL will automatically detect that therefore the length info can be 0 in this case (the last parameter) */
+    glShaderSource(fragmentShader, 1, (const GLchar**)&p, nullptr);
+
+    /* Compile the fragment shader */
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &IsCompiled_FS);
+    if (IsCompiled_FS == FALSE)
+    {
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        /* The maxLength includes the NULL character */
+        char *fragmentInfoLog = (char *)malloc(maxLength);
+
+        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, fragmentInfoLog);
+
+        LOG_ERROR fragmentInfoLog LOG_END;
+        free(fragmentInfoLog);
+        return false;
+    }
+
+    /* If we reached this point it means the vertex and fragment shaders compiled and are syntax error free. */
+    /* We must link them together to make a GL shader program */
+    /* GL shader programs are monolithic. It is a single piece made of 1 vertex shader and 1 fragment shader. */
+    /* Assign our program handle a "name" */
+    shaderProgram = glCreateProgram();
+
+    /* Attach our shaders to our program */
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+
+    /* Bind attribute index 0 (coordinates) to in_Position and attribute index 1 (color) to in_Color */
+    /* Attribute locations must be setup before calling glLinkProgram. */
+    glBindAttribLocation(shaderProgram, 0, "pos");
+    glBindAttribLocation(shaderProgram, 1, "tex");
+
+    /* Link our program */
+    /* At this stage, the vertex and fragment programs are inspected, optimized and a binary code is generated for the shader. */
+    /* The binary code is uploaded to the GPU, if there is no error. */
+    glLinkProgram(shaderProgram);
+
+    /* Again, we must check and make sure that it linked. If it fails, it would mean either there is a mismatch between the vertex */
+    /* and fragment shaders. It might be that you have surpassed your GPU's abilities. Perhaps too many ALU operations or */
+    /* too many texel fetch instructions or too many interpolators or dynamic loops. */
+
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, (int *)&IsLinked);
+    if (IsLinked == FALSE)
+    {
+        /* Noticed that glGetProgramiv is used to get the length for a shader program, not glGetShaderiv. */
+        glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
+
+        /* The maxLength includes the NULL character */
+        char *shaderProgramInfoLog = (char *)malloc(maxLength);
+
+        /* Notice that glGetProgramInfoLog, not glGetShaderInfoLog. */
+        glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, shaderProgramInfoLog);
+
+        LOG_ERROR shaderProgramInfoLog LOG_END;
+        free(shaderProgramInfoLog);
+        return false;
+    }
+
+    /* Load the shader into the rendering pipeline */
+    glUseProgram(shaderProgram);
+
+    glBindTexture(GL_TEXTURE_2D, renderCore.framebuffer);
+
     glClearColor(0, 1, 0.2f, 1);
+
+    checkGLErrors("Init GL");
     
     return true;
 }
 
 Renderer::Renderer(HWND _hwnd, float sceneWidth, float sceneHeight) : hwnd(_hwnd), hpen(NULL), bitmap(NULL), dcBuffer(NULL),
-sceneWidth(sceneWidth), sceneHeight(sceneHeight)
+sceneWidth(sceneWidth), sceneHeight(sceneHeight), isReady(false)
 {
 	//hdc = GetDC(hwnd);
 	//HGLRC tempContext = wglCreateContext(hdc);
@@ -452,11 +598,50 @@ void Renderer::BeginRender()
 
 void Renderer::EndRender()
 {
+    if (!isReady)
+        return;
     /*DeleteObject(hpen);
     
     BitBlt(hdc, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom, dcBuffer, 0, 0, SRCCOPY);
     
     EndPaint(hwnd, &ps);*/
+    /*checkGLErrors("Dispatch compute shader0");
+    glUseProgram(renderCore.program.program);
+    glUniform1f(glGetUniformLocation(renderCore.program.program, "roll"), (float)0.01f);
+    checkGLErrors("Dispatch compute shader");
+    glDispatchCompute(512 / 16, 512 / 16, 1); // 512^2 threads in blocks of 16^2
+    checkGLErrors("Dispatch compute shader2");*/
+    
+    checkGLErrors("Dispatch compute shader30");
+    
+    //glEnable(GL_TEXTURE_2D);
+    checkGLErrors("Dispatch compute shader33");
+    
+    
+
+    /*glBegin(GL_TRIANGLE_FAN);
+    checkGLErrors("Dispatch compute shader2");
+    glVertex2f(0, 0);
+    checkGLErrors("Dispatch compute shader3");
+    glTexCoord2f(0, 0);
+    
+    glVertex2f(0, 1);
+    glTexCoord2f(0, 1);
+
+    glVertex2f(1, 1);
+    glTexCoord2f(1, 1);
+
+    glVertex2f(1, 0);
+    glTexCoord2f(1, 1);
+    glEnd();
+
+    checkGLErrors("Dispatch compute shader55");*/
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    
+
+    //glDrawElements(GL_TRIANGLE_FAN, 0, 4, verts);
+    checkGLErrors("Dispatch compute shader2");
+    
     SwapBuffers(hdc);
 }
 

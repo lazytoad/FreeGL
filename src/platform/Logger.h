@@ -13,6 +13,8 @@ class Logger
         bool Write(const LogMessage &stream);
 
         static bool InitDefaultLogger(const char * filename, bool isLoggingToOutput);
+
+        static Logger UBIDefaultLogger;
     private:
         std::string Filename;
         bool IsLoggingToOutput;
@@ -41,11 +43,11 @@ class LogMessage
         Logger * logger;
 };
 
-extern Logger UBIDefaultLogger;
 
-#define LOG_ERROR {LogMessage UBIlogMessage(LogMessage::LOGERROR, &UBIDefaultLogger); UBIlogMessage <<
-#define LOG_WARNING {LogMessage UBIlogMessage(LogMessage::LOGWARNING, &UBIDefaultLogger); UBIlogMessage <<
-#define LOG_INFO {LogMessage UBIlogMessage(LogMessage::LOGINFO, &UBIDefaultLogger); UBIlogMessage <<
+
+#define LOG_ERROR {LogMessage UBIlogMessage(LogMessage::LOGERROR, &Logger::UBIDefaultLogger); UBIlogMessage <<
+#define LOG_WARNING {LogMessage UBIlogMessage(LogMessage::LOGWARNING, &Logger::UBIDefaultLogger); UBIlogMessage <<
+#define LOG_INFO {LogMessage UBIlogMessage(LogMessage::LOGINFO, &Logger::UBIDefaultLogger); UBIlogMessage <<
 
 #define LOG_END ; UBIlogMessage.flush(); }
 

@@ -28,13 +28,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -151,16 +151,22 @@
     <ClCompile Include="src\platform\Application.cpp" />
     <ClCompile Include="src\platform\Entry.cpp" />
     <ClCompile Include="src\platform\Logger.cpp" />
+    <ClCompile Include="src\platform\Program.cpp" />
     <ClCompile Include="src\platform\QPCTimer.cpp" />
+    <ClCompile Include="src\platform\RenderCore.cpp" />
     <ClCompile Include="src\platform\Renderer.cpp" />
+    <ClCompile Include="src\platform\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\platform\Application.h" />
     <ClInclude Include="src\platform\Consts.h" />
     <ClInclude Include="src\platform\Logger.h" />
+    <ClInclude Include="src\platform\Program.h" />
     <ClInclude Include="src\platform\QPCTimer.h" />
+    <ClInclude Include="src\platform\RenderCore.h" />
     <ClInclude Include="src\platform\Renderer.h" />
     <ClInclude Include="src\platform\ThreadTask.h" />
+    <ClInclude Include="src\platform\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

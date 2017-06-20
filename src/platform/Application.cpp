@@ -30,17 +30,17 @@ void Application::Render()
     float g = (float)rand() / RAND_MAX;
     float b = (float)rand() / RAND_MAX;
 
-    glClearColor(r, g, b, 1);
+    //glClearColor(r, g, b, 1);
 	renderer->BeginRender();
 
-    glColor3f(1, 1, 1);
+    /*glColor3f(1, 1, 1);
 
     glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(0, 0);
-    glVertex2f(0, 1);
+    glVertex2f(-1, -1);
+    glVertex2f(-1, 1);
     glVertex2f(1, 1);
-    glVertex2f(1, 0);
-    glEnd();
+    glVertex2f(1, -1);
+    glEnd();*/
     
 
 	renderer->EndRender();

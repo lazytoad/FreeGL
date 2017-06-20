@@ -5,6 +5,8 @@
 
 #include "Consts.h"
 
+#include "RenderCore.h"
+
 class Renderer
 {
     public:
@@ -48,4 +50,14 @@ class Renderer
 
         float sceneWidth;
         float sceneHeight;
+
+        bool isReady;
+
+        unsigned vertexBuffer;
+        unsigned vertexArray;
+        unsigned vertexShader;
+        unsigned fragmentShader;
+        unsigned shaderProgram;
+
+        RenderCore renderCore;
 };

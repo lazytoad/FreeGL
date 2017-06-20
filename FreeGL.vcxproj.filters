@@ -26,6 +26,15 @@
     <ClCompile Include="src\platform\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\platform\RenderCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\Program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\platform\Application.h">
@@ -44,6 +53,15 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\ThreadTask.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\RenderCore.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\Program.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\Utils.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,7 +4,7 @@
 
 #include "Logger.h"
 
-Logger UBIDefaultLogger;
+Logger Logger::UBIDefaultLogger;
 
 bool Logger::Init(const char * filename, bool isLoggingToOutput)
 {
@@ -56,9 +56,9 @@ bool Logger::InitDefaultLogger(const char * filename, bool isLoggingToOutput)
     return UBIDefaultLogger.Init(filename, isLoggingToOutput);
 }
 
-LogMessage::LogMessage(LogLevel level, Logger * logger)
+LogMessage::LogMessage(LogLevel level, Logger * _logger)
 {
-    logger = logger;
+    logger = _logger;
 	logLevel = level;
     switch (logLevel)
     {
