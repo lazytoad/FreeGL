@@ -27,13 +27,45 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
 	tri.Initialize();
 	tri.SetTexture(Global::Instance().GetTriTexture());
 
-	Triangle::TexturedVertex vertices[3] = 
+	Triangle::TexturedVertex vertices[] = 
 	{
 		{
-			{0, 0, 0},
-			{0, 0}
+			{0.1f, 0.1f, 0},
+			{0, 0},
+			//1
+		},
+		{
+			{ 0.9f, 0.1f, 0 },
+			{ 1, 0 },
+			//1
+		},
+		{
+			{ 0.9f, 0.9f, 0 },
+			{ 1, 1 },
+			//1
+		},
+
+		{
+			{0.1f, 0.1f, 0},
+			{0, 0},
+			//1
+		},
+		{
+			{ 0.9f, 0.9f, 0 },
+			{ 1, 1 },
+			//1
+		},
+		{
+			{ 0.1f, 0.9f, 0 },
+			{ 0, 1 },
+			//1
 		}
 	};
+
+	//Triangle::TriStruct T;
+	//memcpy(&T, vertices, sizeof(T));
+
+	tri.SetData(vertices, sizeof(vertices) / sizeof(Triangle::TexturedVertex) / 3);
  
     return true;
 }
@@ -45,9 +77,10 @@ void Application::Render()
     float g = (float)rand() / RAND_MAX;
     float b = (float)rand() / RAND_MAX;
 
-    glClearColor(r, g, b, 1);
+    //glClearColor(r, g, b, 1);
 	renderer->BeginRender();
     
+	tri.Render();
 
 	renderer->EndRender();
 }

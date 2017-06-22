@@ -9,11 +9,16 @@ public:
 	{
 		float v[3];
 		float t[2];
+		//float padding;
+	};
+	struct TriStruct
+	{
+		TexturedVertex p[3];
 	};
 
 	Triangle();
 	void Initialize();
-	void SetData(TexturedVertex *buffer, size_t elementsNumber);
+	void SetData(void *buffer, size_t elementsNumber);
 	void SetTexture(TextureBuffer * _texture)
 	{
 		texture = _texture;

@@ -27,6 +27,11 @@ public:
 		return &triTexture;
 	}
 
+	unsigned GetFrameBuffer()
+	{
+		return framebuffer;
+	}
+
 	void Initialize();
 	void Shutdowm() {} // \todo make useable
 
@@ -41,4 +46,6 @@ private:
 
 	Program primitives[PRIMITIVES_TOTAL];
 	TextureBuffer triTexture;
+
+	GLuint framebuffer;
 };

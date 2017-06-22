@@ -14,7 +14,8 @@ bool TextureBuffer::Create(unsigned _width, unsigned _height)
 
 void TextureBuffer::Fill(void * data)
 {
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RED, GL_FLOAT, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	checkGLErrors("texture fill");
 }
 
 void TextureBuffer::FillChecker()
@@ -27,7 +28,7 @@ void TextureBuffer::FillChecker()
 	{
 		for (unsigned i = 0; i < width; ++i)
 		{
-			unsigned char value = ((j / stripes) % 2) * 255;
+			unsigned char value = 255 - ((((j / stripes) % 2) + ((i / stripes) % 2)) %2)* 255;
 			data[ (i + j * width) * 4 + 0 ] = value;
 			data[ (i + j * width) * 4 + 1 ] = value;
 			data[ (i + j * width) * 4 + 2 ] = value;

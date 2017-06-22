@@ -13,6 +13,9 @@ Global &Global::Instance()
 
 void Global::Initialize()
 {
+	framebuffer = genTexture();
+	glBindImageTexture(0, framebuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
+
 	primitives[TRIANGLE].createFromFile("res/triangle.prog");
 
 	triTexture.Create(512, 512);

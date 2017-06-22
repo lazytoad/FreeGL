@@ -11,7 +11,7 @@ void RenderCore::initialize()
 	
     program.create("uniform float roll;\
 		 layout(binding = 0) uniform image2D destTex;\
-		 layout (local_size_x = 1024, local_size_y = 1) in;\
+		 layout (local_size_x = 16, local_size_y = 16) in;\
 		 void main() {\
 			 ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);\
 			 float value = (( int(roll*256) + storePos.x + storePos.y) % 256) / 255.0;\n\
@@ -20,9 +20,6 @@ void RenderCore::initialize()
 			 //imageStore(destTex, storePos, vec4(1.0-globalCoef*localCoef, 0.0, 0.0, 1.0));\n\
 imageStore(destTex, storePos, vec4(value, 0.0, 0.0, 1.0));\n\
 		 }");
-	
-    framebuffer = genTexture();
-	glBindImageTexture(0, framebuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 
 
 	Global::Instance().Initialize();

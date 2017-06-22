@@ -18,9 +18,7 @@
 class RenderCore
 {
 public:
-
 	void initialize();
 
-	GLuint framebuffer;
 	Program program;
 };

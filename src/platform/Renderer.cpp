@@ -9,6 +9,8 @@
 
 #include "Utils.h"
 
+#include "fgl/Global.h"
+
 
 
 #define DEFAULT_COLOR_BUFFER_SIZE 32
@@ -531,7 +533,7 @@ void main(void) {   \n\
 
     glActiveTexture(GL_TEXTURE0);
 
-    glBindTexture(GL_TEXTURE_2D, renderCore.framebuffer);
+    glBindTexture(GL_TEXTURE_2D, Global::Instance().GetFrameBuffer());
 
     glClearColor(0, 1, 0.2f, 1);
 
@@ -583,20 +585,19 @@ void Renderer::EndRender()
     checkGLErrors("Dispatch compute shader0");
 
 	//glUseProgramStages(pipeline, GL_COMPUTE_SHADER_BIT, programC);
-    glUseProgram(renderCore.program.program);
+    /*glUseProgram(renderCore.program.program);
+
+	
 	static float roll = 0;
 	roll += 0.001f;
 	if (roll > 1)
 		roll = 0.001f;
     glUniform1f(glGetUniformLocation(renderCore.program.program, "roll"), roll);
     checkGLErrors("Dispatch compute shader");
-    glDispatchCompute(512 / 128, 512 / 128, 1); // 512^2 threads in blocks of 16^2
-    checkGLErrors("Dispatch compute shader2");
-    
-    checkGLErrors("Dispatch compute shader30");
-    
-    //glEnable(GL_TEXTURE_2D);
-    checkGLErrors("Dispatch compute shader33");
+    glDispatchCompute(512 / 16, 512 / 16, 1); // 512^2 threads in blocks of 16^2
+    checkGLErrors("Dispatch compute shader2");*/
+
+	//glBindTexture(GL_TEXTURE_2D, renderCore.framebuffer);
     
     
     glUseProgram(shaderProgram);
