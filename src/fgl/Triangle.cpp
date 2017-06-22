@@ -5,6 +5,11 @@
 
 Triangle::Triangle()
 {
+	
+}
+
+void Triangle::Initialize()
+{
 	glGenBuffers(1, &dataBuffer);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataBuffer);

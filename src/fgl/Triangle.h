@@ -12,6 +12,7 @@ public:
 	};
 
 	Triangle();
+	void Initialize();
 	void SetData(TexturedVertex *buffer, size_t elementsNumber);
 	void SetTexture(TextureBuffer * _texture)
 	{

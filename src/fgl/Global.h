@@ -22,9 +22,9 @@ public:
 		return primitives[primitive].program;
 	}
 
-	unsigned int GetTriTexture()
+	TextureBuffer *GetTriTexture()
 	{
-		return triTexture.texture;
+		return &triTexture;
 	}
 
 	void Initialize();

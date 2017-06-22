@@ -24,6 +24,16 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
     ViewPos.x = ViewPos.y = 0;
 
     DTAccumulated = 0;
+	tri.Initialize();
+	tri.SetTexture(Global::Instance().GetTriTexture());
+
+	Triangle::TexturedVertex vertices[3] = 
+	{
+		{
+			{0, 0, 0},
+			{0, 0}
+		}
+	};
  
     return true;
 }
