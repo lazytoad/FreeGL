@@ -19,18 +19,12 @@ void Triangle::Initialize()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, dataBuffer);
 }
 
-void Triangle::SetData(void * buffer, size_t size)
+void Triangle::SetData(void * buffer, size_t _size)
 {
-	/*auto sz = sizeof(TriStruct);
-	float tmpbug[19] = {
-		1,2,3,4,5,
-		6,7,8,9,10,
-		11,12,13,14,15,
-		16, 17, 18, 19
-	};*/
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataBuffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 15 * 4 * size, buffer, GL_STATIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 15 * 4 * _size, buffer, GL_STATIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, dataBuffer);
+	size = _size;
 }
 
 void Triangle::Render()
@@ -67,9 +61,9 @@ void Triangle::Render()
 
 	//auto uloc = glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "add");
 	auto loc = glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "add");
-	glUniform2f(loc, 0, 0);
-	glUniform2f(glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "scale"), 512, 512);
-	glDispatchCompute(1, 1, 1);
+	glUniform2f(loc, 256, 256);
+	glUniform2f(glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "scale"), 256, 256);
+	glDispatchCompute((size + 1024 - 1) / 1024, 1, 1);
 	
 
 	//glMemoryBarrier(GL_ALL_BARRIER_BITS);

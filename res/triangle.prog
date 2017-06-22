@@ -19,9 +19,9 @@ layout(binding = 0) readonly buffer indata {
 	float elements[];
 };
 
-layout(packed, binding = 1) writeonly buffer indata2 {
+/*layout(packed, binding = 1) writeonly buffer indata2 {
 	float outdata[40];
-};
+};*/
 
 uniform vec2 add;
 uniform vec2 scale;
@@ -54,33 +54,30 @@ void main()
 
 	//imageStore(destTex, ivec2(gl_GlobalInvocationID.xy), vec4(0, 1, 0, 1));
 
+	uint base = k * triSize;
 
+	vec2 tri[3];
+	vec2 tex[3];
+	vec3 pos3d[3];
 
-	vec2 tri[3];	
+	//vec
 
 	for(uint i = 0; i < 3; ++i)
 	{
-		tri[i] = vec2(elements[k * triSize + i * pointSize + 0], elements[k * triSize + i * pointSize + 1]) * scale + add;
+		pos3d[i] = vec3(elements[base + i * pointSize + 0], elements[base + i * pointSize + 1], elements[base + i * pointSize + 2]);
+		tri[i] = pos3d[i].xy * scale + add;
+		tex[i] = vec2(elements[base + i * pointSize + 3], elements[base + i * pointSize + 4]);
 	}
-
-	
-	
-	outdata[15] = elements.length();
+	float lightingMultiplier = normalize(cross(pos3d[1] - pos3d[0], pos3d[2] - pos3d[0])).z;
 
 	vec2 lo = round(tri[2]);
 	vec2 hi = round(tri[2]);
 	for(uint i = 0; i < 2; ++i)
 	{
-		lo = min(lo, round(tri[i]));
-		hi = max(hi, round(tri[i]));
+		lo = min(lo, (round(tri[i])));
+		hi = max(hi, (round(tri[i])));
 	}
-	//outdata[0] = hi.x;
-	//outdata[1] = hi.y;
-	//outdata[2] = lo.x;
-	//outdata[3] = lo.y;
-	//hi = vec2(0, 0);
-	//hi = max(hi, vec2(1, 0.5));
-	//lo = vec2(0, 0) * scale + add;
+
 
 	
 
@@ -95,25 +92,35 @@ void main()
 
 	for (float j = lo.y; j <= hi.y; ++j)
 	{
+		//bool prevRendered = false;
 		for (float i = lo.x; i < hi.x; ++i)
 		{
 			vec2 p = vec2(i, j);
 			vec3 bariCoords =  BaryCoords(p, tri);
 
-			if (bariCoords.x > 0 && bariCoords.y > 0 && bariCoords.z > 0)
+			if (bariCoords.x >= -0.01 && bariCoords.y >= -0.01 && bariCoords.z >= -0.01)
 			{
-				vec2 texPos = vec2(elements[k * triSize + 0 * pointSize + 3], elements[k * triSize + 0 * pointSize + 4])  * bariCoords.z +
-								vec2(elements[k * triSize + 1 * pointSize + 3], elements[k * triSize + 1 * pointSize + 4]) * bariCoords.x +
-								vec2(elements[k * triSize + 2 * pointSize + 3], elements[k * triSize + 2 * pointSize + 4]) * bariCoords.y;
+				vec2 texPos = tex[0]  * bariCoords.z +
+								tex[1] * bariCoords.x +
+								tex[2] * bariCoords.y;
 				ivec2 iTexPos = ivec2(texPos * 512);
-				vec4 value = imageLoad(srcTex, iTexPos);//ivec2(11, 11));
-				imageStore(destTex, ivec2(p), value);
+				vec4 value = imageLoad(srcTex, iTexPos);//ivec2(11, 11));vec4(1, 1, 1, 1);//
+				imageStore(destTex, ivec2(p), value * lightingMultiplier);
+				//prevRendered = true;
 			}
-			/*else
+			else
 			{
-				vec4 value = vec4(0, 0.5, 0.5, 1);
-				imageStore(destTex, ivec2(p), value);
-			}*/
+				/*if (prevRendered)
+				{
+					vec2 texPos = tex[0]  * bariCoords.z +
+									tex[1] * bariCoords.x +
+									tex[2] * bariCoords.y;
+					ivec2 iTexPos = ivec2(texPos * 512);
+					vec4 value = imageLoad(srcTex, iTexPos);//ivec2(11, 11));vec4(1, 1, 1, 1);//
+					imageStore(destTex, ivec2(p), value);
+				}
+				prevRendered = false;*/
+			}
 		}
 	}
 }

@@ -27,7 +27,85 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
 	tri.Initialize();
 	tri.SetTexture(Global::Instance().GetTriTexture());
 
-	Triangle::TexturedVertex vertices[] = 
+	std::vector<Triangle::TexturedVertex> vertices;
+
+	int bigSectors = 30;
+	int smallSectors = 60;
+	float bigRadius = 0.7f;
+	float smallRadius = 0.3f;
+
+	for (int i = 0; i < bigSectors; ++i)
+	{
+		float phaseBig0 = M_PI * 2 * i / bigSectors;
+		float phaseBig1 = M_PI * 2 * (i + 1) / bigSectors;
+
+		
+		for (int j = 0; j < smallSectors; ++j)
+		{
+			float phaseSmall0 = M_PI * 2 * j / smallSectors;
+			float phaseSmall1 = M_PI * 2 * (j + 1) / smallSectors;
+
+			Triangle::TexturedVertex vertex;
+			vertex.t[0] = 1.0f * j / smallSectors;
+			vertex.t[1] = 1.0f * i / bigSectors;
+
+			vertex.v[0] = cosf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
+			vertex.v[1] = sinf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
+			vertex.v[2] = smallRadius * sinf(phaseSmall0);
+
+			vertices.emplace_back(vertex); // 0, 0
+
+			vertex.t[0] = 1.0f * (j + 1) / smallSectors;
+			vertex.t[1] = 1.0f * i / bigSectors;
+
+			vertex.v[0] = cosf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall1));
+			vertex.v[1] = sinf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall1));
+			vertex.v[2] = smallRadius * sinf(phaseSmall1);
+
+			vertices.emplace_back(vertex); // 0, 1
+
+			vertex.t[0] = 1.0f * (j + 1) / smallSectors;
+			vertex.t[1] = 1.0f * (i + 1) / bigSectors;
+
+			vertex.v[0] = cosf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
+			vertex.v[1] = sinf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
+			vertex.v[2] = smallRadius * sinf(phaseSmall1);
+
+			vertices.emplace_back(vertex); // 1, 1
+
+
+			vertex.t[0] = 1.0f * j / smallSectors;
+			vertex.t[1] = 1.0f * i / bigSectors;
+
+			vertex.v[0] = cosf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
+			vertex.v[1] = sinf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
+			vertex.v[2] = smallRadius * sinf(phaseSmall0);
+
+			vertices.emplace_back(vertex); // 0, 0
+
+			vertex.t[0] = 1.0f * (j + 1) / smallSectors;
+			vertex.t[1] = 1.0f * (i + 1) / bigSectors;
+
+			vertex.v[0] = cosf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
+			vertex.v[1] = sinf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
+			vertex.v[2] = smallRadius * sinf(phaseSmall1);
+
+			vertices.emplace_back(vertex); // 1, 1
+
+			vertex.t[0] = 1.0f * j / smallSectors;
+			vertex.t[1] = 1.0f * (i + 1) / bigSectors;
+
+			vertex.v[0] = cosf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall0));
+			vertex.v[1] = sinf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall0));
+			vertex.v[2] = smallRadius * sinf(phaseSmall0);
+
+			vertices.emplace_back(vertex); // 1, 0
+
+			
+		}
+	}
+
+	Triangle::TexturedVertex vvertices[] = 
 	{
 		{
 			{0.1f, 0.1f, 0},
@@ -65,7 +143,8 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
 	//Triangle::TriStruct T;
 	//memcpy(&T, vertices, sizeof(T));
 
-	tri.SetData(vertices, sizeof(vertices) / sizeof(Triangle::TexturedVertex) / 3);
+	//tri.SetData(vvertices, sizeof(vvertices) / sizeof(Triangle::TexturedVertex) / 3);
+	tri.SetData(vertices.data(), vertices.size() / 3);
  
     return true;
 }

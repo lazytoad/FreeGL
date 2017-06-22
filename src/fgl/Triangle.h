@@ -27,4 +27,5 @@ public:
 
 	TextureBuffer * texture;
 	unsigned dataBuffer;
+	unsigned size;
 };
