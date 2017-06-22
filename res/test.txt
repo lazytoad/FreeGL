@@ -1,0 +1,73 @@
+//#version 430
+
+
+
+layout(std140) buffer;
+
+#define groups 1024
+
+//layout(binding = 1, offset = 0) uniform atomic_float atomicCounter;
+
+layout(packed, binding = 0) writeonly buffer buf
+{
+uint it[10];
+};
+
+shared int shareData[groups];
+shared int elemCount[groups];
+shared int froms[groups];
+shared int tos[groups];
+
+layout(packed, binding = 1) readonly buffer indata {
+uint elements[];
+};
+
+layout (local_size_x = groups) in;
+
+void main()
+{
+
+    //int size = (elements.size()) / groups;
+	uint ourid = gl_LocalInvocationIndex.x;
+	uint from = uint(double(ourid) * elements.length() / groups);
+	uint to = uint(double(ourid + 1) * elements.length() / groups);
+
+	//float maxf = elements[from];
+	uint check = 0;
+
+	for (uint i = from; i < to; ++i)
+	{
+		check = check ^ elements[i];
+	}
+	shareData[gl_LocalInvocationID.x] = int(check);
+	froms[gl_LocalInvocationID.x] = int(from);
+	tos[gl_LocalInvocationID.x] = elements.length();
+	elemCount[gl_LocalInvocationID.x] = int(to) - int(from);
+	//memoryBarrierShared();
+	//barrier();
+	if (groups - 1 == gl_LocalInvocationID.x)
+	{
+	bool flags[groups];
+	uint count = to - from;
+		for (int i = 0; i < groups - 1; ++i)
+		{
+			check = check ^ uint(shareData[i]);
+			count += elemCount[i];
+
+			flags[i] = elemCount[i] != to - from;
+		}
+		for (int i = 0; i < groups - 1; ++i)
+		{
+			if (flags[i])
+			{
+				it[0] = i;
+				it[1] = froms[i];
+				it[2] = tos[i];
+				return;
+			}
+		}
+		it[0] = check;
+	}
+	
+	
+}

@@ -9,31 +9,52 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\platform">
+      <UniqueIdentifier>{4f41bd97-21ea-4175-be27-6de92ca49c7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\fgl">
+      <UniqueIdentifier>{b358be4f-9a68-49b3-8907-2df327ed83be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\res">
+      <UniqueIdentifier>{134b5d8e-6edf-4c28-be44-0047027de545}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\platform\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\Entry.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\QPCTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\RenderCore.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\Program.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\QPCTimer.cpp">
+      <Filter>Source Files\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\RenderCore.cpp">
+      <Filter>Source Files\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\Renderer.cpp">
+      <Filter>Source Files\platform</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\Utils.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fgl\Triangle.cpp">
+      <Filter>Source Files\fgl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fgl\DepthBuffer.cpp">
+      <Filter>Source Files\fgl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fgl\TextureBuffer.cpp">
+      <Filter>Source Files\fgl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fgl\Global.cpp">
+      <Filter>Source Files\fgl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -41,28 +62,45 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\Consts.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\Logger.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\QPCTimer.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\Renderer.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\ThreadTask.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\RenderCore.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\Program.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\QPCTimer.h">
+      <Filter>Source Files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\RenderCore.h">
+      <Filter>Source Files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\Renderer.h">
+      <Filter>Source Files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\ThreadTask.h">
+      <Filter>Source Files\platform</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\Utils.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\fgl\Triangle.h">
+      <Filter>Source Files\fgl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fgl\DepthBuffer.h">
+      <Filter>Source Files\fgl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fgl\TextureBuffer.h">
+      <Filter>Source Files\fgl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fgl\Global.h">
+      <Filter>Source Files\fgl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\triangle.prog">
+      <Filter>Source Files\res</Filter>
+    </None>
   </ItemGroup>
 </Project>

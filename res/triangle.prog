@@ -1,0 +1,80 @@
+struct Point
+{
+    vec3 v;
+    vec2 t;
+};
+
+struct TriStruct
+{
+	Point p[3];
+};
+
+layout(binding = 0) uniform image2D destTex;
+layout(rgba8, binding = 1) uniform image2D srcTex;
+
+layout(binding = 0) readonly buffer indata {
+	TriStruct elements[];
+};
+
+uniform vec2 add;
+uniform vec2 scale;
+
+layout( local_size_x = 1024 ) in;
+
+vec3 BaryCoords(in vec2 p, in vec2 tri[3])
+{
+	vec2 p10 = tri[1] - tri[0];
+	vec2 p20 = tri[2] - tri[0];
+	float area2 = p10.x * p20.y - p10.y * p20.x;
+
+	if (area2 < 0.1)
+		return vec3(-1, -1, -1);
+
+	float s = 1/(area2)*(tri[0].y*tri[2].x - tri[0].x*tri[2].y + (p20.y)*p.x - (p20.x)*p.y);
+	float t = 1/(area2)*(tri[0].x*tri[1].y - tri[0].y*tri[1].x - (p10.y)*p.x + (p10.x)*p.y);
+
+	return vec3(s, t, 1 - s - t);
+}
+
+void main()
+{
+	uint k = gl_LocalInvocationIndex.x + gl_GlobalInvocationID.x * gl_WorkGroupSize.x;
+	if (k > elements.length())
+		return;
+
+	//vec2i sizeBuffer = 
+
+	TriStruct current = elements[k];
+
+	vec2 tri[3];	
+
+	for(uint i = 0; i < 3; ++i)
+	{
+		tri[i] = current.p[i].v.xy * scale + add;
+	}
+
+	vec2 lo = round(current.p[2].v.xy);
+	vec2 hi = round(current.p[2].v.xy);
+	for(uint i = 0; i < 2; ++i)
+	{
+		lo = min(lo, round(current.p[i].v.xy));
+		hi = min(lo, round(current.p[i].v.xy));
+	}
+
+	for (float j = lo.y; j <= hi.y; ++j)
+	{
+		for (float i = lo.x; i < hi.x; ++i)
+		{
+			vec2 p = vec2(i, j);
+			vec3 bariCoords =  BaryCoords(p, tri);
+
+			if (bariCoords.x > 0 && bariCoords.y > 0 && bariCoords.z > 0)
+			{
+				vec2 texPos = current.p[0].t * bariCoords.x + current.p[1].t * bariCoords.y + current.p[2].t * bariCoords.z;
+				ivec2 iTexPos = ivec2(texPos * 512);
+				vec4 value = imageLoad(srcTex, iTexPos);
+				imageStore(destTex, ivec2(p), value);
+			}
+		}
+	}
+}

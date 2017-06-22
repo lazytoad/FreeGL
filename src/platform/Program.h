@@ -2,7 +2,7 @@
 
 #include "GL/glew.h"
 
-class Program
+struct Program
 {
 public:
     Program();

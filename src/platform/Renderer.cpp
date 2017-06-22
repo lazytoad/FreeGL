@@ -399,46 +399,23 @@ bool Renderer::initializeGL(WindowCreationParams* params)
         vsync = false;
 		
 
-    // Some old graphics cards support EXT_framebuffer_object instead of ARB_framebuffer_object.
-    // Patch ARB_framebuffer_object functions to EXT_framebuffer_object ones since semantic is same.
-    /*if (!GLEW_ARB_framebuffer_object && GLEW_EXT_framebuffer_object)
-    {
-        glBindFramebuffer = glBindFramebufferEXT;
-        glBindRenderbuffer = glBindRenderbufferEXT;
-        glBlitFramebuffer = glBlitFramebufferEXT;
-        glCheckFramebufferStatus = glCheckFramebufferStatusEXT;
-        glDeleteFramebuffers = glDeleteFramebuffersEXT;
-        glDeleteRenderbuffers = glDeleteRenderbuffersEXT;
-        glFramebufferRenderbuffer = glFramebufferRenderbufferEXT;
-        glFramebufferTexture1D = glFramebufferTexture1DEXT;
-        glFramebufferTexture2D = glFramebufferTexture2DEXT;
-        glFramebufferTexture3D = glFramebufferTexture3DEXT;
-        glFramebufferTextureLayer = glFramebufferTextureLayerEXT;
-        glGenFramebuffers = glGenFramebuffersEXT;
-        glGenRenderbuffers = glGenRenderbuffersEXT;
-        glGenerateMipmap = glGenerateMipmapEXT;
-        glGetFramebufferAttachmentParameteriv = glGetFramebufferAttachmentParameterivEXT;
-        glGetRenderbufferParameteriv = glGetRenderbufferParameterivEXT;
-        glIsFramebuffer = glIsFramebufferEXT;
-        glIsRenderbuffer = glIsRenderbufferEXT;
-        glRenderbufferStorage = glRenderbufferStorageEXT;
-        glRenderbufferStorageMultisample = glRenderbufferStorageMultisampleEXT;
-    }*/
-
     glGenVertexArrays(1, &vertexArray);
+
     glBindVertexArray(vertexArray);
 
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
-    float verts[] = { 0, 0, 0, 0,
-        0, 1, 0, 1,
+    float verts[] = { -1, -1, 0, 0,
+        -1, 1, 0, 1,
         1, 1, 1, 1,
-        1, 0, 1, 0 };
+        1, -1, 1, 0 };
 
     glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), verts, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, 0);
+	glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 16, (char*)8);
+	glEnableVertexAttribArray(1);
 
     const char vshCode[] =
 "#version 150       \n\
@@ -552,6 +529,8 @@ void main(void) {   \n\
     /* Load the shader into the rendering pipeline */
     glUseProgram(shaderProgram);
 
+    glActiveTexture(GL_TEXTURE0);
+
     glBindTexture(GL_TEXTURE_2D, renderCore.framebuffer);
 
     glClearColor(0, 1, 0.2f, 1);
@@ -600,17 +579,19 @@ void Renderer::EndRender()
 {
     if (!isReady)
         return;
-    /*DeleteObject(hpen);
     
-    BitBlt(hdc, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom, dcBuffer, 0, 0, SRCCOPY);
-    
-    EndPaint(hwnd, &ps);*/
-    /*checkGLErrors("Dispatch compute shader0");
+    checkGLErrors("Dispatch compute shader0");
+
+	//glUseProgramStages(pipeline, GL_COMPUTE_SHADER_BIT, programC);
     glUseProgram(renderCore.program.program);
-    glUniform1f(glGetUniformLocation(renderCore.program.program, "roll"), (float)0.01f);
+	static float roll = 0;
+	roll += 0.001f;
+	if (roll > 1)
+		roll = 0.001f;
+    glUniform1f(glGetUniformLocation(renderCore.program.program, "roll"), roll);
     checkGLErrors("Dispatch compute shader");
-    glDispatchCompute(512 / 16, 512 / 16, 1); // 512^2 threads in blocks of 16^2
-    checkGLErrors("Dispatch compute shader2");*/
+    glDispatchCompute(512 / 128, 512 / 128, 1); // 512^2 threads in blocks of 16^2
+    checkGLErrors("Dispatch compute shader2");
     
     checkGLErrors("Dispatch compute shader30");
     
@@ -618,24 +599,8 @@ void Renderer::EndRender()
     checkGLErrors("Dispatch compute shader33");
     
     
-
-    /*glBegin(GL_TRIANGLE_FAN);
-    checkGLErrors("Dispatch compute shader2");
-    glVertex2f(0, 0);
-    checkGLErrors("Dispatch compute shader3");
-    glTexCoord2f(0, 0);
-    
-    glVertex2f(0, 1);
-    glTexCoord2f(0, 1);
-
-    glVertex2f(1, 1);
-    glTexCoord2f(1, 1);
-
-    glVertex2f(1, 0);
-    glTexCoord2f(1, 1);
-    glEnd();
-
-    checkGLErrors("Dispatch compute shader55");*/
+    glUseProgram(shaderProgram);
+    glBindVertexArray(vertexArray);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     
 

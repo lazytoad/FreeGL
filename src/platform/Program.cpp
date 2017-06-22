@@ -1,6 +1,8 @@
 #include "Program.h"
 #include "Logger.h"
 
+#include <memory.h>
+
 GLuint Program::create(const char * source)
 {
     // Creating the compute shader, and the program object containing the shader
@@ -52,10 +54,9 @@ GLuint Program::create(const char * source)
         return program;
     }
     glUseProgram(progHandle);
+	//glUniform1i(glGetUniformLocation(progHandle, "destTex"), 0);
 
     program = progHandle;
-
-    //glUniform1i(glGetUniformLocation(progHandle, "destTex"), 0);
 
     //checkErrors("Compute shader");
     return progHandle;
@@ -63,7 +64,31 @@ GLuint Program::create(const char * source)
 
 GLuint Program::createFromFile(const char * fileName)
 {
-    return GLuint();
+	FILE *file = fopen(fileName, "r");
+	if (nullptr == file)
+	{
+		LOG_ERROR "file not found! " << fileName LOG_END;
+		return 0;
+	}
+
+	fseek(file, 0, SEEK_END);
+	auto size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	char * contents = (char*)malloc(size + 1);
+	auto numsize = fread(contents, 1, size, file);
+	if (numsize < 1)
+	{
+		fclose(file);
+		free(contents);
+		LOG_ERROR "file read failed! " << fileName LOG_END;
+		return 0;
+	}
+	contents[numsize] = '\0';
+	std::string str = contents;
+	fclose(file);
+	GLuint result = create(contents);
+	free(contents);
+    return result;
 }
 
 Program::Program()

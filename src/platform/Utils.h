@@ -7,4 +7,4 @@
 bool checkGLErrors(const char *string);
 bool checkGLErrors(const std::string &string);
 
-GLuint genTexture();
+GLuint genTexture(unsigned width = 512, unsigned height = 512);

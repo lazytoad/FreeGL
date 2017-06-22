@@ -87,8 +87,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,8 +120,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,6 +152,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\fgl\DepthBuffer.cpp" />
+    <ClCompile Include="src\fgl\Global.cpp" />
+    <ClCompile Include="src\fgl\TextureBuffer.cpp" />
+    <ClCompile Include="src\fgl\Triangle.cpp" />
     <ClCompile Include="src\platform\Application.cpp" />
     <ClCompile Include="src\platform\Entry.cpp" />
     <ClCompile Include="src\platform\Logger.cpp" />
@@ -158,6 +166,10 @@
     <ClCompile Include="src\platform\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fgl\DepthBuffer.h" />
+    <ClInclude Include="src\fgl\Global.h" />
+    <ClInclude Include="src\fgl\TextureBuffer.h" />
+    <ClInclude Include="src\fgl\Triangle.h" />
     <ClInclude Include="src\platform\Application.h" />
     <ClInclude Include="src\platform\Consts.h" />
     <ClInclude Include="src\platform\Logger.h" />
@@ -167,6 +179,9 @@
     <ClInclude Include="src\platform\Renderer.h" />
     <ClInclude Include="src\platform\ThreadTask.h" />
     <ClInclude Include="src\platform\Utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\triangle.prog" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -12,6 +12,8 @@
 
 #include "Program.h"
 
+#include "fgl/TextureBuffer.h"
+
 
 class RenderCore
 {
