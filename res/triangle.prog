@@ -27,8 +27,8 @@ uniform vec2 add;
 uniform vec2 scale;
 
 layout( local_size_x = 1024 ) in;
-
-vec3 BaryCoords(in vec2 p, in vec2 tri[3])
+/*
+vec3 BaryCoords(in vec2 p, in vec2 tri[3], vec2 p10, float area2)
 {
 	vec2 p10 = tri[1] - tri[0];
 	vec2 p20 = tri[2] - tri[0];
@@ -37,11 +37,11 @@ vec3 BaryCoords(in vec2 p, in vec2 tri[3])
 	if (area2 < 0.1)
 		return vec3(-1, -1, -1);
 
-	float s = 1/(area2)*(tri[0].y*tri[2].x - tri[0].x*tri[2].y + (p20.y)*p.x - (p20.x)*p.y);
-	float t = 1/(area2)*(tri[0].x*tri[1].y - tri[0].y*tri[1].x - (p10.y)*p.x + (p10.x)*p.y);
+	float s = (area2)*(tri[0].y*tri[2].x - tri[0].x*tri[2].y + (p20.y)*p.x - (p20.x)*p.y);
+	float t = (area2)*(tri[0].x*tri[1].y - tri[0].y*tri[1].x - (p10.y)*p.x + (p10.x)*p.y);
 
 	return vec3(s, t, 1 - s - t);
-}
+}*/
 
 void main()
 {
@@ -79,47 +79,37 @@ void main()
 	}
 
 
+	vec2 p10 = tri[1] - tri[0];
+	vec2 p20 = tri[2] - tri[0];
+	float area2 = p10.x * p20.y - p10.y * p20.x;
+	if (area2 <= 0)
+		return;
 	
+	area2 = 1 / area2;
 
-	//vec4 bad = vec4(elements.length() * 0.5, elements.length() * 0.5, 0.1, 1);
-	
-	//if (hi.x < 10)
-	//	bad.x = 1;
-	//if (hi.y < 10)
-	//	bad.y = 1;
-	
-	
+	float arg1 = tri[0].y*tri[2].x - tri[0].x*tri[2].y;
+	float arg2 = tri[0].x*tri[1].y - tri[0].y*tri[1].x;
 
 	for (float j = lo.y; j <= hi.y; ++j)
 	{
-		//bool prevRendered = false;
 		for (float i = lo.x; i < hi.x; ++i)
 		{
-			vec2 p = vec2(i, j);
-			vec3 bariCoords =  BaryCoords(p, tri);
+			//vec2 p = vec2(i, j);
+			float s = (area2)*(arg1 + (p20.y)*i - (p20.x)*j);
+			float t = (area2)*(arg2 - (p10.y)*i + (p10.x)*j);
+			float u = 1 - s - t;
+			//vec3 bariCoords =  BaryCoords(p, tri);
 
-			if (bariCoords.x >= -0.01 && bariCoords.y >= -0.01 && bariCoords.z >= -0.01)
+			//vec3 bariCoords = vec3(s, t, u);
+
+			if (s >= -0.01 && t >= -0.01 && u >= -0.01)
 			{
-				vec2 texPos = tex[0]  * bariCoords.z +
-								tex[1] * bariCoords.x +
-								tex[2] * bariCoords.y;
+				vec2 texPos = tex[0]  * u +
+								tex[1] * s +
+								tex[2] * t;
 				ivec2 iTexPos = ivec2(texPos * 512);
 				vec4 value = imageLoad(srcTex, iTexPos);//ivec2(11, 11));vec4(1, 1, 1, 1);//
-				imageStore(destTex, ivec2(p), value * lightingMultiplier);
-				//prevRendered = true;
-			}
-			else
-			{
-				/*if (prevRendered)
-				{
-					vec2 texPos = tex[0]  * bariCoords.z +
-									tex[1] * bariCoords.x +
-									tex[2] * bariCoords.y;
-					ivec2 iTexPos = ivec2(texPos * 512);
-					vec4 value = imageLoad(srcTex, iTexPos);//ivec2(11, 11));vec4(1, 1, 1, 1);//
-					imageStore(destTex, ivec2(p), value);
-				}
-				prevRendered = false;*/
+				imageStore(destTex, ivec2(i, j), value * lightingMultiplier);
 			}
 		}
 	}
