@@ -11,6 +11,8 @@
 
 #include "fgl/Global.h"
 
+#include "Consts.h"
+
 
 
 #define DEFAULT_COLOR_BUFFER_SIZE 32
@@ -34,8 +36,8 @@ struct Config
 
         x = -1;
         y = -1;
-        width = 800;
-        height = 600;
+        width = Consts::DefaultSceneWidth;
+        height = Consts::DefaultSceneHeight;
 
         samples = 0;
     }

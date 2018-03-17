@@ -5,7 +5,11 @@ bool checkGLErrors(const char *string)
 {
     GLenum e = glGetError();
     if (e != GL_NO_ERROR) {
+#ifndef NDEBUG
         LOG_ERROR "OpenGL error in " << string << ":" << gluErrorString(e) << "\n code = " << e LOG_END;
+#else
+		LOG_ERROR "OpenGL error in " << string << ":" << e << "\n code = " << e LOG_END;
+#endif
         return false;
     }
 

@@ -10,6 +10,7 @@ public:
 	{
 		TRIANGLE = 0,
 		SPRITE	 = 1,
+        GRID     = 2,
 		PRIMITIVES_TOTAL
 	};
 	static Global &Instance();
@@ -32,6 +33,11 @@ public:
 		return framebuffer;
 	}
 
+	unsigned int GetWidth() { return frameWidth; }
+	unsigned int GetHeight() { return frameHeight; }
+
+	int getNumLocalGroups() { return localGroups; }
+
 	void Initialize();
 	void Shutdowm() {} // \todo make useable
 
@@ -43,6 +49,7 @@ private:
 	float minY;
 	float maxX;
 	float maxY;
+	int localGroups;
 
 	Program primitives[PRIMITIVES_TOTAL];
 	TextureBuffer triTexture;

@@ -1,0 +1,52 @@
+
+layout(rgba8, binding = 0) uniform writeonly image2D srcTex;
+
+layout(binding = 0) readonly buffer layer00 {
+	float layer0[];
+};
+
+layout(binding = 1) readonly buffer layer11 {
+	float layer1[];
+};
+
+layout(binding = 2) writeonly buffer outdata {
+	float layer2[];
+};
+
+layout( local_size_x = #GROUPS_X ) in;
+
+void main()
+{
+	uint x = gl_GlobalInvocationID.x % #WIDTH;
+	uint y = gl_GlobalInvocationID.x / #WIDTH;
+	const uint width = #WIDTH;//gl_WorkGroupSize.x;
+	const uint height = #HEIGHT;
+
+	uint ind = x + y * width;
+	float value;
+
+	const float tau = 1.0;
+	const float c = 0.06;
+	const float h = 10.0;
+
+	const float friction = 0.0001;
+	
+	
+	if (x == 0 || y == 0 || width <= x + 1 || height <= y + 1)
+	{
+		value = 0.0;
+	}
+	else
+	{
+		value = 2 * layer1[ind] - layer0[ind] + tau * tau * c * c / (h * h) * 
+		(layer1[ind - 1] - 2 * layer1[ind] + layer1[ind + 1] +
+		layer1[ind - width] - 2 * layer1[ind] + layer1[ind + width]) -
+		//tau * friction * (layer1[ind]);
+		tau * friction * (layer1[ind] - layer0[ind]);
+	}
+
+	layer2[ind] = value;
+	vec4 color = (value * 1.0 + 0.5).xxxx;
+
+	imageStore(srcTex, ivec2(x, y), color);
+}

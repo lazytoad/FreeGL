@@ -40,11 +40,6 @@ void Triangle::Render()
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 40 * sizeof(float), nullptr, GL_STATIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, tmp);*/
 
-	//auto texLoc = glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "srcTex");
-	//glUniform1i(texLoc, 1);
-
-
-	//glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture->texture);
 	glBindImageTexture(2, texture->texture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 
@@ -54,8 +49,6 @@ void Triangle::Render()
 	unsigned char val = u[0];
 	delete[] u;*/
 
-
-	//glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Global::Instance().GetFrameBuffer());
 	glBindImageTexture(0, Global::Instance().GetFrameBuffer(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 

@@ -1,6 +1,8 @@
 #include "Global.h"
 
+#include "platform/Consts.h"
 #include "platform/Utils.h"
+#include "platform/Logger.h"
 
 #include <stdlib.h>
 
@@ -13,12 +15,29 @@ Global &Global::Instance()
 
 void Global::Initialize()
 {
-	framebuffer = genTexture();
+
+	SetFrameBuffer(Consts::DefaultSceneWidth, Consts::DefaultSceneHeight);
+
+	framebuffer = genTexture(frameWidth, frameHeight);
 	glBindImageTexture(0, framebuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 
-	primitives[TRIANGLE].createFromFile("res/triangle.prog");
+	localGroups = -1;
 
-	triTexture.Create(512, 512);
+	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &localGroups);
+
+    LOG_I("Workgroups: " << localGroups << "\n Compiling compute shaders...");
+
+	//GL_MAX_COMPUTE_WORK_GROUP_COUNT GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS
+
+	std::map<std::string, std::string> replacements;
+	replacements["#WIDTH"] = std::to_string(Consts::DefaultSceneWidth);
+	replacements["#HEIGHT"] = std::to_string(Consts::DefaultSceneHeight);
+	replacements["#GROUPS_X"] = std::to_string(localGroups);
+
+	primitives[TRIANGLE].createFromFile("res/triangle.prog", &replacements);
+    primitives[GRID].createFromFile("res/grid.prog", &replacements);
+
+	triTexture.Create(Consts::DefaultSceneWidth, Consts::DefaultSceneHeight);
 	triTexture.FillChecker();
 
 	/*Program prg;

@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Logger.h"
 #include "Consts.h"
+#include "Input.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"
@@ -12,8 +13,12 @@
 #include "fgl/Global.h"
 
 #include "fgl/Triangle.h"
+#include "fgl/GridCalc.h"
 
-Triangle tri;
+//Triangle tri;
+
+GridCalc grid(Consts::DefaultSceneWidth, Consts::DefaultSceneHeight);
+float *buffers[3];
 
 // PUBLIC INTERFACE
 
@@ -24,127 +29,32 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
     ViewPos.x = ViewPos.y = 0;
 
     DTAccumulated = 0;
-	tri.Initialize();
-	tri.SetTexture(Global::Instance().GetTriTexture());
 
-	std::vector<Triangle::TexturedVertex> vertices;
+    grid.SetTexture(Global::Instance().GetTriTexture());
+    int theId = -1;
+    buffers[0] = grid.GetBuffer(theId);
+    theId = -1;
+    buffers[1] = grid.GetBuffer(theId);
+    theId = -1;
+    buffers[2] = grid.GetBuffer(theId);
 
-	int bigSectors = 30;
-	int smallSectors = 60;
-	float bigRadius = 0.7f;
-	float smallRadius = 0.3f;
+    for (unsigned int i = 0; i < Consts::DefaultSceneWidth * Consts::DefaultSceneHeight; ++i)
+    {
+        buffers[0][i] = 0.0f;
+        buffers[1][i] = 0.0f;
+        buffers[2][i] = 0.0f;
+    }
 
-	for (int i = 0; i < bigSectors; ++i)
-	{
-		float phaseBig0 = M_PI * 2 * i / bigSectors;
-		float phaseBig1 = M_PI * 2 * (i + 1) / bigSectors;
+    buffers[1][Consts::DefaultSceneWidth / 2 * Consts::DefaultSceneWidth + Consts::DefaultSceneWidth / 2] = 10.0f;
+    buffers[0][Consts::DefaultSceneWidth / 2 * Consts::DefaultSceneWidth + Consts::DefaultSceneWidth / 2] = 10.00f;
+    //buffers[1][256 * 512 + 255] = 0.1f;
+    //buffers[1][255 * 512 + 256] = 0.1f;
+    //buffers[1][255 * 512 + 255] = 0.1f;
 
-		
-		for (int j = 0; j < smallSectors; ++j)
-		{
-			float phaseSmall0 = M_PI * 2 * j / smallSectors;
-			float phaseSmall1 = M_PI * 2 * (j + 1) / smallSectors;
+    grid.UpdateBuffer(0);
+    grid.UpdateBuffer(1);
+    grid.UpdateBuffer(2);
 
-			Triangle::TexturedVertex vertex;
-			vertex.t[0] = 1.0f * j / smallSectors;
-			vertex.t[1] = 1.0f * i / bigSectors;
-
-			vertex.v[0] = cosf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
-			vertex.v[1] = sinf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
-			vertex.v[2] = smallRadius * sinf(phaseSmall0);
-
-			vertices.emplace_back(vertex); // 0, 0
-
-			vertex.t[0] = 1.0f * (j + 1) / smallSectors;
-			vertex.t[1] = 1.0f * i / bigSectors;
-
-			vertex.v[0] = cosf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall1));
-			vertex.v[1] = sinf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall1));
-			vertex.v[2] = smallRadius * sinf(phaseSmall1);
-
-			vertices.emplace_back(vertex); // 0, 1
-
-			vertex.t[0] = 1.0f * (j + 1) / smallSectors;
-			vertex.t[1] = 1.0f * (i + 1) / bigSectors;
-
-			vertex.v[0] = cosf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
-			vertex.v[1] = sinf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
-			vertex.v[2] = smallRadius * sinf(phaseSmall1);
-
-			vertices.emplace_back(vertex); // 1, 1
-
-
-			vertex.t[0] = 1.0f * j / smallSectors;
-			vertex.t[1] = 1.0f * i / bigSectors;
-
-			vertex.v[0] = cosf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
-			vertex.v[1] = sinf(phaseBig0) * (bigRadius + smallRadius * cosf(phaseSmall0));
-			vertex.v[2] = smallRadius * sinf(phaseSmall0);
-
-			vertices.emplace_back(vertex); // 0, 0
-
-			vertex.t[0] = 1.0f * (j + 1) / smallSectors;
-			vertex.t[1] = 1.0f * (i + 1) / bigSectors;
-
-			vertex.v[0] = cosf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
-			vertex.v[1] = sinf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall1));
-			vertex.v[2] = smallRadius * sinf(phaseSmall1);
-
-			vertices.emplace_back(vertex); // 1, 1
-
-			vertex.t[0] = 1.0f * j / smallSectors;
-			vertex.t[1] = 1.0f * (i + 1) / bigSectors;
-
-			vertex.v[0] = cosf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall0));
-			vertex.v[1] = sinf(phaseBig1) * (bigRadius + smallRadius * cosf(phaseSmall0));
-			vertex.v[2] = smallRadius * sinf(phaseSmall0);
-
-			vertices.emplace_back(vertex); // 1, 0
-
-			
-		}
-	}
-
-	Triangle::TexturedVertex vvertices[] = 
-	{
-		{
-			{0.1f, 0.1f, 0},
-			{0, 0},
-			//1
-		},
-		{
-			{ 0.9f, 0.1f, 0 },
-			{ 1, 0 },
-			//1
-		},
-		{
-			{ 0.9f, 0.9f, 0 },
-			{ 1, 1 },
-			//1
-		},
-
-		{
-			{0.1f, 0.1f, 0},
-			{0, 0},
-			//1
-		},
-		{
-			{ 0.9f, 0.9f, 0 },
-			{ 1, 1 },
-			//1
-		},
-		{
-			{ 0.1f, 0.9f, 0 },
-			{ 0, 1 },
-			//1
-		}
-	};
-
-	//Triangle::TriStruct T;
-	//memcpy(&T, vertices, sizeof(T));
-
-	//tri.SetData(vvertices, sizeof(vvertices) / sizeof(Triangle::TexturedVertex) / 3);
-	tri.SetData(vertices.data(), vertices.size() / 3);
  
     return true;
 }
@@ -152,14 +62,52 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
 
 void Application::Render()
 {
-    float r = (float)rand() / RAND_MAX;
-    float g = (float)rand() / RAND_MAX;
-    float b = (float)rand() / RAND_MAX;
+    //float r = (float)rand() / RAND_MAX;
+    //float g = (float)rand() / RAND_MAX;
+    //float b = (float)rand() / RAND_MAX;
+
+    if (Input::MouseUp[0])
+    {
+        int lastbuf = (int)grid.GetLastBuffer();
+        int buf1Ind = (lastbuf + 1) % 3;
+        //int buf1Ind = (lastbuf + 1) % 3;
+        float *buf = grid.GetBuffer(buf1Ind);
+        int ind = (Consts::DefaultSceneHeight - Input::MouseY) * Consts::DefaultSceneWidth + Input::MouseX;
+        float add = -4.2f;
+        buf[ind] += add;
+        /*buf[ind + 1] += add;
+        buf[ind + 2] += add;
+        buf[ind + 3] += add;
+        buf[ind + 4] += add;
+        buf[ind + 5] += add;*/
+        /*float maxv = -1000.0f;
+        float minv = 1000.0f;
+        for (unsigned int i = 0; i < W * H; ++i)
+        {
+            if (buf[i] < minv)
+            {
+                minv = buf[i];
+            }
+
+            if (buf[i] > maxv)
+            {
+                maxv = buf[i];
+            }
+            //buf[i] = 0.0;
+        }*/
+        grid.UpdateBuffer(buf1Ind);
+
+        //Sleep(50);
+    }
 
     //glClearColor(r, g, b, 1);
 	renderer->BeginRender();
+    //Sleep(50);
+
     
-	tri.Render();
+    
+	//tri.Render();
+    grid.Calculate();
 
 	renderer->EndRender();
 }
