@@ -1,0 +1,14 @@
+//layout(rgba8, binding = 0) uniform image2D destTex;
+layout(binding = 0) buffer zBuffer {
+	float zbuf[];
+};
+
+uniform float zClearValue = -3.4+38f;
+
+layout( local_size_x = 1024 ) in;
+
+void main()
+{
+	uint k = gl_GlobalInvocationID.x;
+	zbuf[k] = zClearValue;
+}

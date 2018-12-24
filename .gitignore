@@ -1,1 +1,7 @@
 /log.log
+/Release
+/Debug
+/.vs
+/FreeGL.VC.db
+/FreeGL.exe
+/FreeGL.vcxproj.user

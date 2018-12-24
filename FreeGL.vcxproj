@@ -71,6 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -89,13 +90,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)/thirdparty;$(ProjectDir)/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>thirdparty/glew32.lib;OpenGL32.lib;GLU32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>thirdparty/assimp-vc140-mt.lib;thirdparty/glew32.lib;OpenGL32.lib;GLU32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -158,6 +159,7 @@
     <ClCompile Include="src\fgl\Triangle.cpp" />
     <ClCompile Include="src\platform\Application.cpp" />
     <ClCompile Include="src\platform\Entry.cpp" />
+    <ClCompile Include="src\platform\Input.cpp" />
     <ClCompile Include="src\platform\Logger.cpp" />
     <ClCompile Include="src\platform\Program.cpp" />
     <ClCompile Include="src\platform\QPCTimer.cpp" />
@@ -172,6 +174,7 @@
     <ClInclude Include="src\fgl\Triangle.h" />
     <ClInclude Include="src\platform\Application.h" />
     <ClInclude Include="src\platform\Consts.h" />
+    <ClInclude Include="src\platform\Input.h" />
     <ClInclude Include="src\platform\Logger.h" />
     <ClInclude Include="src\platform\Program.h" />
     <ClInclude Include="src\platform\QPCTimer.h" />
@@ -181,6 +184,7 @@
     <ClInclude Include="src\platform\Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\clean.prog" />
     <None Include="res\triangle.prog" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

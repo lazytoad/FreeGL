@@ -6,6 +6,7 @@
 #include "Consts.h"
 
 #include "RenderCore.h"
+#include "Program.h"
 
 class Renderer
 {
@@ -58,6 +59,9 @@ class Renderer
         unsigned vertexShader;
         unsigned fragmentShader;
         unsigned shaderProgram;
+
+        unsigned zBuffer;
+        Program clearProgram;
 
         RenderCore renderCore;
 };

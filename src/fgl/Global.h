@@ -27,10 +27,19 @@ public:
 		return &triTexture;
 	}
 
-	unsigned GetFrameBuffer()
+    GLuint GetFrameBuffer()
 	{
 		return framebuffer;
 	}
+
+    GLuint GetZBuffer()
+    {
+        return zBuffer;
+    }
+
+	unsigned int GetWidth() { return frameWidth; }
+	unsigned int GetHeight() { return frameHeight; }
+	int getNumLocalGroups() { return localGroups; }
 
 	void Initialize();
 	void Shutdowm() {} // \todo make useable
@@ -43,9 +52,11 @@ private:
 	float minY;
 	float maxX;
 	float maxY;
+	int localGroups;
 
 	Program primitives[PRIMITIVES_TOTAL];
 	TextureBuffer triTexture;
 
 	GLuint framebuffer;
+    GLuint zBuffer;
 };

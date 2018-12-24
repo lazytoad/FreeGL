@@ -1,91 +1,111 @@
 #include "Global.h"
 
+#include "platform/Consts.h"
 #include "platform/Utils.h"
+#include "platform/Logger.h"
 
 #include <stdlib.h>
+#include <map>
+#include <string>
 
 static Global _instance;
 
 Global &Global::Instance()
 {
-	return _instance;
+    return _instance;
 }
 
 void Global::Initialize()
 {
-	framebuffer = genTexture();
-	glBindImageTexture(0, framebuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
+    SetFrameBuffer(Consts::DefaultSceneWidth, Consts::DefaultSceneHeight);
+    glGenBuffers(1, &zBuffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, zBuffer);
+    glBufferStorage(GL_SHADER_STORAGE_BUFFER, Consts::DefaultSceneWidth * Consts::DefaultSceneHeight * sizeof(float),
+                    nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+    framebuffer = genTexture(Consts::DefaultSceneWidth, Consts::DefaultSceneHeight);
+    glBindImageTexture(0, framebuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 
-	primitives[TRIANGLE].createFromFile("res/triangle.prog");
+    localGroups = -1;
 
-	triTexture.Create(512, 512);
-	triTexture.FillChecker();
+    glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &localGroups);
 
-	/*Program prg;
-	prg.createFromFile("res/test.txt");
+    LOG_I("Workgroups: " << localGroups << "\n Compiling compute shaders...");
 
-	unsigned size = 5 * 1024 * 1024;// 25 * 1024 * 1024;
-	unsigned *data = new unsigned[size];
+    std::map<std::string, std::string> replacements;
+    replacements["#WIDTH"] = std::to_string(Consts::DefaultSceneWidth);
+    replacements["#HEIGHT"] = std::to_string(Consts::DefaultSceneHeight);
+    replacements["#GROUPS_X"] = std::to_string(localGroups);
 
-	unsigned chk = 0;
+    primitives[TRIANGLE].createFromFile("res/triangle.prog", &replacements);
 
-	for (unsigned i = 0; i < size; ++i)
-	{
-		data[i] = rand() * rand();
-		chk = chk ^ data[i];
-	}
+    triTexture.Create(512, 512);
+    triTexture.FillChecker();
 
-	GLuint buf;
-	GLuint out;
+    /*Program prg;
+    prg.createFromFile("res/test.txt");
 
-	glGenBuffers(1, &buf);
-	glGenBuffers(1, &out);
+    unsigned size = 5 * 1024 * 1024;// 25 * 1024 * 1024;
+    unsigned *data = new unsigned[size];
 
-	glUseProgram(prg.program);
+    unsigned chk = 0;
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, out);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, out);
+    for (unsigned i = 0; i < size; ++i)
+    {
+        data[i] = rand() * rand();
+        chk = chk ^ data[i];
+    }
 
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 40, 0, GL_DYNAMIC_DRAW);
-	GLuint zero[3] = { 0, 0, 0};
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 40, zero);
-	checkGLErrors("Dispatch compute shader0");
+    GLuint buf;
+    GLuint out;
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, buf);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, buf);
+    glGenBuffers(1, &buf);
+    glGenBuffers(1, &out);
 
-	glBufferData(GL_SHADER_STORAGE_BUFFER, size * 4, data, GL_STATIC_COPY);
-	
-	//glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	glDispatchCompute(1, 1, 1); // 512^2 threads in blocks of 16^2
-	checkGLErrors("Dispatch compute shader1");
+    glUseProgram(prg.program);
 
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);//GL_SHADER_STORAGE_BARRIER_BIT);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, out);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, out);
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, out);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 40, 0, GL_DYNAMIC_DRAW);
+    GLuint zero[3] = { 0, 0, 0};
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 40, zero);
+    checkGLErrors("Dispatch compute shader0");
 
-	GLint *ptr = (GLint *)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-	GLint  check[3] = {ptr[0], ptr[1], ptr[2]};
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-	checkGLErrors("Dispatch compute shader2");
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, buf);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, buf);
 
-	if (check[2] != chk)
-	{
-		printf("tt");
-	}*/
+    glBufferData(GL_SHADER_STORAGE_BUFFER, size * 4, data, GL_STATIC_COPY);
+
+    //glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    glDispatchCompute(1, 1, 1); // 512^2 threads in blocks of 16^2
+    checkGLErrors("Dispatch compute shader1");
+
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);//GL_SHADER_STORAGE_BARRIER_BIT);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, out);
+
+    GLint *ptr = (GLint *)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+    GLint  check[3] = {ptr[0], ptr[1], ptr[2]};
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    checkGLErrors("Dispatch compute shader2");
+
+    if (check[2] != chk)
+    {
+        printf("tt");
+    }*/
 
 }
 
 void Global::SetViewport(float _minX, float _minY, float _maxX, float _maxY)
 {
-	minX = _minX;
-	minY = _minY;
-	maxX = _maxX;
-	maxY = _maxY;
+    minX = _minX;
+    minY = _minY;
+    maxX = _maxX;
+    maxY = _maxY;
 }
 
 void Global::SetFrameBuffer(unsigned width, unsigned height)
 {
-	frameWidth = width;
-	frameHeight = height;
+    frameWidth = width;
+    frameHeight = height;
 }

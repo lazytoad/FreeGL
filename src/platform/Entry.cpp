@@ -1,10 +1,12 @@
 #include <Windows.h>
+#include <Windowsx.h>
 
 #include "Consts.h"
 #include "QPCTimer.h"
 #include "Application.h"
 #include "Logger.h"
 #include "Renderer.h"
+#include "Input.h"
 
 static const wchar_t windowClassName[] = L"FreeGL";
 static HWND windowHandle = NULL;
@@ -26,6 +28,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
         application.Render();
 		waitForRender = false;
+        break;
+    case WM_MOUSEMOVE:
+        {
+            int xPos = GET_X_LPARAM(lParam);
+            int yPos = GET_Y_LPARAM(lParam);
+            Input::MouseMove(xPos, yPos);
+        }
+    break;
+    case WM_LBUTTONDOWN:
+        Input::MouseDown[0] = true;
+        Input::MousePressed[0] = true;
+        break;
+    case WM_RBUTTONDOWN:
+        Input::MouseDown[1] = true;
+        Input::MousePressed[1] = true;
+        break;
+    case WM_LBUTTONUP:
+        Input::MouseUp[0] = true;
+        Input::MousePressed[0] = false;
+        break;
+    case WM_RBUTTONUP:
+        Input::MouseUp[1] = true;
+        Input::MousePressed[1] = false;
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
@@ -71,8 +96,8 @@ int main(int argc, char **argv)
     }
     Logger::InitDefaultLogger("log.log", true);
     LOG_INFO "log initialized" LOG_END;
-    // Yes, I use const cast in situations like this. As the string is used as constant and it is easy to change to non-console entry point.
-    //return WinMain(NULL, NULL, const_cast<LPSTR>(argsJoined.c_str()), SW_SHOW);
+
+    Input::Init();
     Renderer renderer(nullptr);
     renderer.Initialize();
 
@@ -103,16 +128,53 @@ int main(int argc, char **argv)
             {
                 return 0;
             }
+            else
+            {
+                switch (msg.message)
+                {
+                case WM_MOUSEMOVE:
+                {
+                    int xPos = GET_X_LPARAM(msg.lParam);
+                    int yPos = GET_Y_LPARAM(msg.lParam);
+                    Input::MouseMove(xPos, yPos);
+
+                    //LOG_INFO "X: " << xPos << " " << yPos LOG_END;
+                }
+                break;
+                case WM_LBUTTONDOWN:
+                    Input::MouseDown[0] = true;
+                    Input::MousePressed[0] = true;
+                    break;
+                case WM_RBUTTONDOWN:
+                    Input::MouseDown[1] = true;
+                    Input::MousePressed[1] = true;
+                    break;
+                case WM_LBUTTONUP:
+                    Input::MouseUp[0] = true;
+                    Input::MousePressed[0] = false;
+                    break;
+                case WM_RBUTTONUP:
+                    Input::MouseUp[1] = true;
+                    Input::MousePressed[1] = false;
+                    break;
+                }
+            }
         }
         //else
         {
+            
             application.Render();
+            
             //renderer.BeginRender();
             //renderer.EndRender();
         }
+
         double t = timer.Stamp();
         time += t;
         ++feets;
+        application.Update((float)t);
+        Input::ResetStates();
+        
 
         if (time >= 1)
         {
@@ -131,8 +193,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 
     MSG msg;
 
-    windowHandle = CreateWindow(windowClassName, L"Morgun Dmytro for programmer", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+    windowHandle = CreateWindow(windowClassName, L"FGL rasterizer", WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, Consts::DefaultSceneWidth, Consts::DefaultSceneHeight, NULL, NULL, hInstance, NULL);
 
 	// This actually could fail because of the security policies. But I think, honouring them here will make the code worse with no real benefits.
     

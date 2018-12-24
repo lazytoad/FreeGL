@@ -8,7 +8,7 @@ layout(std140) buffer;
 
 //layout(binding = 1, offset = 0) uniform atomic_float atomicCounter;
 
-layout(packed, binding = 0) writeonly buffer buf
+layout(packed, binding = 0) buffer buf
 {
 uint it[10];
 };

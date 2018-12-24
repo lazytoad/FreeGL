@@ -20,5 +20,5 @@ class RenderCore
 public:
 	void initialize();
 
-	Program program;
+	//Program program;
 };

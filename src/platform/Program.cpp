@@ -3,11 +3,15 @@
 
 #include <memory.h>
 
+#define MAX_COMPUTE_WORK_GROUP_INVOCATIONS 0x90EB
+
 GLuint Program::create(const char * source)
 {
     // Creating the compute shader, and the program object containing the shader
     GLuint progHandle = glCreateProgram();
     GLuint cs = glCreateShader(GL_COMPUTE_SHADER);
+    int num;
+    glGetIntegerv(MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &num);
 
     // In order to write to a texture, we have to introduce it as image2D.
     // local_size_x/y/z layout variables define the work group size.
@@ -62,7 +66,7 @@ GLuint Program::create(const char * source)
     return progHandle;
 }
 
-GLuint Program::createFromFile(const char * fileName)
+GLuint Program::createFromFile(const char * fileName, const std::map<std::string, std::string> *replace)
 {
 	FILE *file = fopen(fileName, "r");
 	if (nullptr == file)
@@ -85,10 +89,28 @@ GLuint Program::createFromFile(const char * fileName)
 	}
 	contents[numsize] = '\0';
 	std::string str = contents;
-	fclose(file);
-	GLuint result = create(contents);
-	free(contents);
+    free(contents);
+    fclose(file);
+
+    if (replace != nullptr)
+    {
+        replaceMacro(str, *replace);
+    }
+    LOG_I(str);
+    GLuint result = create(str.c_str());
     return result;
+}
+
+void Program::replaceMacro(std::string &str, const std::map<std::string, std::string> &macro)
+{
+    for (const auto &pair : macro)
+    {
+        std::string::size_type pos = 0;
+        while ((pos = str.find(pair.first, pos)) != std::string::npos) {
+            str.replace(pos, pair.first.length(), pair.second);
+            pos += pair.second.length(); // Handles case where 'to' is a substring of 'from'
+        }
+    }
 }
 
 Program::Program()

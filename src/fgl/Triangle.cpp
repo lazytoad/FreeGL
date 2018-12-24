@@ -6,6 +6,13 @@
 
 #include "platform/Utils.h"
 
+// \todo delete. move to app
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+aiMatrix4x4t<float> mat;
+
 Triangle::Triangle()
 {
 	
@@ -13,6 +20,8 @@ Triangle::Triangle()
 
 void Triangle::Initialize()
 {
+    //mat.Translation({ 300.0f, 300.0f, 0.0f }, mat);
+
 	glGenBuffers(1, &dataBuffer);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataBuffer);
@@ -40,30 +49,29 @@ void Triangle::Render()
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 40 * sizeof(float), nullptr, GL_STATIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, tmp);*/
 
-	//auto texLoc = glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "srcTex");
-	//glUniform1i(texLoc, 1);
-
-
-	//glActiveTexture(GL_TEXTURE1);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, dataBuffer);
 	glBindTexture(GL_TEXTURE_2D, texture->texture);
 	glBindImageTexture(2, texture->texture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 
-	/*unsigned char *u = new unsigned char[512*512*4];
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, u);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, Global::Instance().GetZBuffer());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, Global::Instance().GetZBuffer());
 
-	unsigned char val = u[0];
-	delete[] u;*/
-
-
-	//glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Global::Instance().GetFrameBuffer());
 	glBindImageTexture(0, Global::Instance().GetFrameBuffer(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 
-	//auto uloc = glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "add");
 	auto loc = glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "add");
-	glUniform2f(loc, 256, 256);
-	glUniform2f(glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "scale"), 256, 256);
-	glDispatchCompute((size + 1024 - 1) / 1024, 1, 1);
+	//glUniform2f(loc, Global::Instance().GetWidth() / 2, Global::Instance().GetHeight() / 2 - 300);
+    glUniform2f(loc, 0, 0);
+	glUniform2f(glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "scale"), 1, 1);
+
+    glUniform1ui(glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "tSz"), size);
+
+    glUniformMatrix4fv(glGetUniformLocation(Global::Instance().GetProgram(Global::TRIANGLE), "transform"), 1, true, matrix);
+	//glDispatchCompute((size + 1024 - 1) / 1024, 1, 1);
+    glDispatchCompute(size, 1, 1);
+
+    
 	
 
 	//glMemoryBarrier(GL_ALL_BARRIER_BITS);

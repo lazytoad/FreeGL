@@ -56,6 +56,9 @@
     <ClCompile Include="src\fgl\Global.cpp">
       <Filter>Source Files\fgl</Filter>
     </ClCompile>
+    <ClCompile Include="src\platform\Input.cpp">
+      <Filter>Source Files\platform</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\platform\Application.h">
@@ -97,9 +100,15 @@
     <ClInclude Include="src\fgl\Global.h">
       <Filter>Source Files\fgl</Filter>
     </ClInclude>
+    <ClInclude Include="src\platform\Input.h">
+      <Filter>Source Files\platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\triangle.prog">
+      <Filter>Source Files\res</Filter>
+    </None>
+    <None Include="res\clean.prog">
       <Filter>Source Files\res</Filter>
     </None>
   </ItemGroup>

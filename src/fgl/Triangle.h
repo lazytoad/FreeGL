@@ -28,4 +28,5 @@ public:
 	TextureBuffer * texture;
 	unsigned dataBuffer;
 	unsigned size;
+    float    matrix[16];
 };

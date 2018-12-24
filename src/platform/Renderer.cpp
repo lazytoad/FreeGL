@@ -6,11 +6,12 @@
 
 #include <assert.h>
 #include <string>
+#include <vector>
 
 #include "Utils.h"
 
 #include "fgl/Global.h"
-
+#include "Consts.h"
 
 
 #define DEFAULT_COLOR_BUFFER_SIZE 32
@@ -34,8 +35,8 @@ struct Config
 
         x = -1;
         y = -1;
-        width = 800;
-        height = 600;
+        width = Consts::DefaultSceneWidth;
+        height = Consts::DefaultSceneHeight;
 
         samples = 0;
     }
@@ -537,6 +538,8 @@ void main(void) {   \n\
 
     glClearColor(0, 1, 0.2f, 1);
 
+    clearProgram.createFromFile("res/clean.prog");
+
     checkGLErrors("Init GL");
     
     return true;
@@ -573,8 +576,29 @@ void Renderer::BeginRender()
     FillRect(dcBuffer, &clientRect, (HBRUSH)(COLOR_WINDOW+1));
     
     hpen = CreatePen(PS_SOLID, 1, 0xff000000);*/
+    
+    //glClear(GL_COLOR_BUFFER_BIT);
+    glBindTexture(GL_TEXTURE_2D, Global::Instance().GetFrameBuffer());
+    unsigned char clearValue[] = { 0, 255, 0, 0 };
+    glClearTexImage(Global::Instance().GetFrameBuffer(), 0, GL_RGBA, GL_UNSIGNED_BYTE, clearValue);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glUseProgram(clearProgram.program);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, Global::Instance().GetZBuffer());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, Global::Instance().GetZBuffer());
+    checkGLErrors("Dispatch compute shader2");
+
+    glUniform1f(glGetUniformLocation(clearProgram.program, "zClearValue"), FLT_MAX);
+
+    unsigned int pixelsTotal = Consts::DefaultSceneWidth * Consts::DefaultSceneHeight;
+    glDispatchCompute((pixelsTotal + 1024 - 1) / 1024, 1, 1);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    //glDispatchCompute(pixelsTotal, 1, 1);
+    glFlush();
+
+    /*glBindBuffer(GL_SHADER_STORAGE_BUFFER, Global::Instance().GetZBuffer());
+    std::vector<float> tmp(pixelsTotal);
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 4 * tmp.size(), tmp.data());*/
+    checkGLErrors("Dispatch compute shader2");
 }
 
 void Renderer::EndRender()
@@ -599,16 +623,22 @@ void Renderer::EndRender()
 
 	//glBindTexture(GL_TEXTURE_2D, renderCore.framebuffer);
     
-    
     glUseProgram(shaderProgram);
+    glBindTexture(GL_TEXTURE_2D, Global::Instance().GetFrameBuffer());
+	
     glBindVertexArray(vertexArray);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     
 
     //glDrawElements(GL_TRIANGLE_FAN, 0, 4, verts);
     checkGLErrors("Dispatch compute shader2");
-    
-    SwapBuffers(hdc);
+	static int cnt = 1;
+	--cnt;
+	if (0 == cnt)
+	{
+		cnt = 1;
+		SwapBuffers(hdc);
+	}
 }
 
 void Renderer::SetSceneSize(float sceneWidth, float sceneHeight)
