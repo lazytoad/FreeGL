@@ -10,6 +10,7 @@ public:
 	{
 		TRIANGLE = 0,
 		SPRITE	 = 1,
+        TRI_RASTER = 2,
 		PRIMITIVES_TOTAL
 	};
 	static Global &Instance();

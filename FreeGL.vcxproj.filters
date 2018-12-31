@@ -111,5 +111,8 @@
     <None Include="res\clean.prog">
       <Filter>Source Files\res</Filter>
     </None>
+    <None Include="res\triangleRasterize.prog">
+      <Filter>Source Files\res</Filter>
+    </None>
   </ItemGroup>
 </Project>

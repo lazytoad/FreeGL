@@ -17,6 +17,7 @@ public:
 	};
 
 	Triangle();
+    ~Triangle();
 	void Initialize();
 	void SetData(void *buffer, size_t elementsNumber);
 	void SetTexture(TextureBuffer * _texture)
@@ -27,6 +28,7 @@ public:
 
 	TextureBuffer * texture;
 	unsigned dataBuffer;
+    unsigned rasterBuffer;
 	unsigned size;
     float    matrix[16];
 };

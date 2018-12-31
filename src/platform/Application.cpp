@@ -21,6 +21,8 @@
 
 Triangle tri;
 
+//#define BUNNY
+
 // PUBLIC INTERFACE
 
 static aiMatrix4x4t<float> mat;
@@ -37,7 +39,7 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
     std::vector<Triangle::TexturedVertex> vertices;
 	
 
-    //*/
+#ifdef BUNNY
     const struct aiScene* scene = aiImportFile("./res/bunny.ply", 0);
     //if (scene) {
     //    get_bounding_box(&scene_min, &scene_max);
@@ -76,9 +78,9 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
             vertex.v[2] = aiVertex.z;
         }
     }
-    /*/
-	int bigSectors = 200;
-	int smallSectors = 60;
+#else
+	int bigSectors = 100;
+	int smallSectors = 30;
 	float bigRadius = 0.7f;
 	float smallRadius = 0.3f;
 
@@ -155,42 +157,7 @@ bool Application::Init(Renderer *inrenderer, const char * commandLine)
 			
 		}
 	}
-    /*/
-
-	/*vertices =
-	{
-		{
-			{-0.9f, -0.9f, 0},
-			{0, 0},
-			//1
-		},
-		{
-			{ 0.9f, -0.9f, 0 },
-			{ 1, 0 },
-			//1
-		},
-		{
-			{ 0.9f, 0.9f, 0 },
-			{ 1, 1 },
-			//1
-		},
-
-		{
-			{ -0.9f, -0.9f, 0 },
-			{0, 0},
-			//1
-		},
-		{
-			{ 0.9f, 0.9f, 0 },
-			{ 1, 1 },
-			//1
-		},
-		{
-			{ -0.9f, 0.9f, 0 },
-			{ 0, 1 },
-			//1
-		}
-	};*/
+#endif
 
 	tri.SetData(vertices.data(), vertices.size() / 3);
  
@@ -219,7 +186,12 @@ void Application::Update(float dt)
     static aiMatrix4x4t<float> matRotation;
 
     aiMatrix4x4t<float> mat2;
-    mat2.Translation({ (float)Global::Instance().GetWidth() / 2, (float)Global::Instance().GetHeight() / 2 - 300, 0.0f }, mat2);
+#ifdef BUNNY
+    float shiftUp = 300.0f;
+#else
+    float shiftUp = 0;
+#endif
+    mat2.Translation({ (float)Global::Instance().GetWidth() / 2, (float)Global::Instance().GetHeight() / 2 - shiftUp, 0.0f }, mat2);
     mat = mat2;
 
     if (Input::MousePressed[0])
@@ -239,9 +211,13 @@ void Application::Update(float dt)
         }
     }
     mat *= matRotation;
-
+#ifdef BUNNY
+    float coef = 5000.0f;
+#else
+    float coef = 500.0f;
+#endif
     //mat.Translation(val, mat);
-    mat2.Scaling({ 3000.0f, 3000.0f, 3000.0f }, mat2);
+    mat2.Scaling({ coef, coef, coef }, mat2);
 
     mat *= mat2;
 

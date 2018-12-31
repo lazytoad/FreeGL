@@ -21,7 +21,7 @@ void Global::Initialize()
     glGenBuffers(1, &zBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, zBuffer);
     glBufferStorage(GL_SHADER_STORAGE_BUFFER, Consts::DefaultSceneWidth * Consts::DefaultSceneHeight * sizeof(float),
-                    nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+                    nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT); // resize the buffer
     framebuffer = genTexture(Consts::DefaultSceneWidth, Consts::DefaultSceneHeight);
     glBindImageTexture(0, framebuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 
@@ -34,9 +34,10 @@ void Global::Initialize()
     std::map<std::string, std::string> replacements;
     replacements["#WIDTH"] = std::to_string(Consts::DefaultSceneWidth);
     replacements["#HEIGHT"] = std::to_string(Consts::DefaultSceneHeight);
-    replacements["#GROUPS_X"] = std::to_string(localGroups);
+    replacements["#GROUPS"] = std::to_string(localGroups); 
 
     primitives[TRIANGLE].createFromFile("res/triangle.prog", &replacements);
+    primitives[TRI_RASTER].createFromFile("res/triangleRasterize.prog", &replacements);
 
     triTexture.Create(512, 512);
     triTexture.FillChecker();

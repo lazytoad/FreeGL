@@ -579,7 +579,7 @@ void Renderer::BeginRender()
     
     //glClear(GL_COLOR_BUFFER_BIT);
     glBindTexture(GL_TEXTURE_2D, Global::Instance().GetFrameBuffer());
-    unsigned char clearValue[] = { 0, 255, 0, 0 };
+    unsigned char clearValue[] = { 0, 0, 0, 0 };
     glClearTexImage(Global::Instance().GetFrameBuffer(), 0, GL_RGBA, GL_UNSIGNED_BYTE, clearValue);
 
     glUseProgram(clearProgram.program);

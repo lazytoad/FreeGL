@@ -1,0 +1,203 @@
+#define pointSize 5
+#define triSize 15
+
+struct RasterInfo
+{
+	int bot, mid, top, isLeft;
+	float arg1, arg2;
+	vec2 p20, p10;
+};
+
+layout(rgba8, binding = 0) uniform image2D destTex;
+layout(binding = 1) buffer zBuffer {
+	float zbuf[];
+};
+layout(rgba8, binding = 2) uniform readonly image2D srcTex;
+
+layout(binding = 0) readonly buffer indata {
+	float elements[];
+};
+
+layout(binding = 3) readonly buffer rasterInfo {
+	RasterInfo rinfo[];
+};
+
+uniform mat4 transform;
+
+layout( local_size_x = #HEIGHT ) in;
+
+void fragment(int i, int j, vec3 pos3d[3], vec3 normal, vec2 tex[3], float u, float s, float t)
+{
+	float zPos = pos3d[0].z * u +
+							pos3d[1].z * s +
+							pos3d[2].z * t;
+
+	unsigned int zIndex = i + j * #WIDTH;
+	if (zbuf[zIndex] > zPos) // z-test
+	{
+		zbuf[zIndex] = zPos;
+		vec2 texPos = tex[0]  * u +
+					tex[1] * s +
+					tex[2] * t;
+		ivec2 iTexPos = ivec2(texPos * 512);
+		vec4 value = imageLoad(srcTex, iTexPos);//ivec2(11, 11));vec4(1, 1, 1, 1);//
+		vec4 pixelValue = imageLoad(destTex, ivec2(i, j));
+		//float alpha = 0.3f;
+		float alpha = 1.0f;
+		//vec4 value = vec4(float(gl_LocalInvocationID.x) / 1024.0f, 
+		//float(1024 - gl_LocalInvocationID.x) / 1024.0f, float(gl_LocalInvocationID.x) / 1024.0f, 1.0f);
+		pixelValue.xyz = value.xyz * (abs(normal.z) * alpha) + pixelValue.xyz * (1 - alpha);
+		imageStore(destTex, ivec2(i, j), pixelValue);
+	}
+	/*else
+	{
+		imageStore(destTex, ivec2(i, j), vec4(1, 0, 1, 1));
+	}*/
+}
+
+void rasterize(int k, uint base, uint index)
+{
+	vec2 tri[3];
+	vec2 tex[3];
+	vec3 pos3d[3];
+
+	for(uint i = 0; i < 3; ++i)
+	{
+		pos3d[i] = (transform * vec4(elements[base + i * pointSize + 0], elements[base + i * pointSize + 1],
+					elements[base + i * pointSize + 2], 1.0f)).xyz;
+		tri[i] = pos3d[i].xy;// * scale + add;
+		tex[i] = vec2(elements[base + i * pointSize + 3], elements[base + i * pointSize + 4]);
+	}
+
+	vec3 normal = normalize(cross(pos3d[1] - pos3d[0], pos3d[2] - pos3d[0]));
+
+	float lightingMultiplier = abs(normalize(cross(pos3d[1] - pos3d[0], pos3d[2] - pos3d[0])).z);
+
+	int topi = 2;
+	int boti = 2;
+	for(int i = 0; i < 2; ++i)
+	{
+		topi = tri[i].y > tri[topi].y ? i : topi;
+		boti = tri[i].y < tri[boti].y ? i : boti;
+	}
+
+	int j = k;
+
+	/*for (int i = 0; i < #WIDTH; ++i)
+	{
+		imageStore(destTex, ivec2(i, j), vec4(1, 1, 1, 1));
+	}*/
+
+	float arg1 = rinfo[index].arg1;
+	float arg2 = rinfo[index].arg2;
+	vec2 p10 = rinfo[index].p10;
+	vec2 p20 = rinfo[index].p20;
+
+	int lefti = 3 - topi - boti;
+
+	if (k >= rinfo[index].mid)
+	{
+		vec2 pLeft = rinfo[index].isLeft != 0 ? tri[lefti] : tri[boti];
+		vec2 pRight = rinfo[index].isLeft != 0 ? tri[boti] : tri[lefti];
+		vec2 pPeak = tri[topi];
+
+		int fromi = max(0, int( (j + 0.5f - pPeak.y) * (pLeft.x - pPeak.x) / (pLeft.y - pPeak.y) + pPeak.x + 0.5));
+		int toi = min(#WIDTH, int( (j + 0.5f - pPeak.y) * (pRight.x - pPeak.x) / (pRight.y - pPeak.y) + pPeak.x + 0.5));
+		
+		for (int i = fromi; i < toi; ++i)
+		{
+			float s = (1)*(arg1 + (p20.y)*(i + 0.5f) - (p20.x)*(j + 0.5f));
+			float t = (1)*(arg2 - (p10.y)*(i + 0.5f) + (p10.x)*(j + 0.5f));
+			float u = 1.0f - s - t;
+
+
+			fragment(i, j, pos3d, normal, tex, u, s, t);
+
+			/*float zPos = pos3d[0].z * u +
+							pos3d[1].z * s +
+							pos3d[2].z * t;
+
+			unsigned int zIndex = i + j * #WIDTH;
+			if (zbuf[zIndex] > zPos) // z-test
+			{
+				zbuf[zIndex] = zPos;
+				vec2 texPos = tex[0]  * u +
+							tex[1] * s +
+							tex[2] * t;
+				ivec2 iTexPos = ivec2(texPos * 512);
+				vec4 value = imageLoad(srcTex, iTexPos);//ivec2(11, 11));vec4(1, 1, 1, 1);//
+				vec4 pixelValue = imageLoad(destTex, ivec2(i, j));
+				//float alpha = 0.3f;
+				float alpha = 1.0f;
+				//vec4 value = vec4(float(gl_LocalInvocationID.x) / 1024.0f, 
+				//float(1024 - gl_LocalInvocationID.x) / 1024.0f, float(gl_LocalInvocationID.x) / 1024.0f, 1.0f);
+				pixelValue.xyz = value.xyz * (lightingMultiplier * alpha) + pixelValue.xyz * (1 - alpha);
+				imageStore(destTex, ivec2(i, j), value * lightingMultiplier);
+			}*/
+			/*else
+			{
+				imageStore(destTex, ivec2(i, j), vec4(1, 0, 1, 1));
+			}*/
+		}
+	}
+	else
+	{
+		vec2 pLeft = rinfo[index].isLeft != 0  ? tri[lefti] : tri[topi];
+		vec2 pRight = rinfo[index].isLeft != 0  ? tri[topi] : tri[lefti];
+		vec2 pPeak = tri[boti];
+
+		int fromi = max(0, int( (j + 0.5f - pPeak.y) * (pLeft.x - pPeak.x) / (pLeft.y - pPeak.y) + pPeak.x + 0.5));
+		int toi = min(#WIDTH, int( (j + 0.5f - pPeak.y) * (pRight.x - pPeak.x) / (pRight.y - pPeak.y) + pPeak.x + 0.5));
+
+		float s = (1)*(arg1 + (p20.y)*(fromi - 1 + 0.5f) - (p20.x)*(j + 0.5f));
+		float t = (1)*(arg2 - (p10.y)*(fromi - 1 + 0.5f) + (p10.x)*(j + 0.5f));
+		
+		for (int i = fromi; i < toi; ++i)
+		{
+			//float s = (1)*(arg1 + (p20.y)*(i + 0.5f) - (p20.x)*(j + 0.5f));
+			//float t = (1)*(arg2 - (p10.y)*(i + 0.5f) + (p10.x)*(j + 0.5f));
+			s += p20.y;
+			t -= p10.y;
+			float u = 1.0f - s - t;
+
+			fragment(i, j, pos3d, normal, tex, u, s, t);
+		}
+	}
+}
+
+void main()
+{
+	int k = int(gl_GlobalInvocationID.x);
+	uint triangles = elements.length() / triSize;
+
+	//rasterize(k, 0, 0);
+	const int tsz = 1600;
+	uint array[tsz];
+	uint cnt = 0;
+	uint maxv = 0;
+	for (uint i = 0; i < triangles; ++i)
+	{
+		if (rinfo[i].bot <= k && rinfo[i].top > k)
+		//if (rinfo[i].bot != 0)
+		{
+			array[cnt] = i;
+			//cnt = i;
+			cnt = (cnt + 1) % tsz;
+			maxv = max(cnt, maxv);
+
+			/*uint base = ;
+			if (cnt == 0)
+				imageStore(destTex, ivec2(cnt, k), vec4(1, 1, 1, 1));
+			++cnt;
+			if (cnt >= #HEIGHT)
+			{
+				return;
+			}*/
+			//rasterize(k, i * triSize, i);
+		}
+	}
+	for (uint i = 0; i < maxv; ++i)
+	{
+		rasterize(k, array[i] * triSize, array[i]);
+	}
+}
